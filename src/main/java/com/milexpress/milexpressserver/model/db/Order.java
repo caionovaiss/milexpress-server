@@ -1,11 +1,8 @@
 package com.milexpress.milexpressserver.model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -28,14 +25,13 @@ public class Order {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "userEmail", insertable = false, updatable = false)
+    @Column(name = "discount", nullable = false)
+    private double discount;
+
+    @Column(name = "total", nullable = false)
+    private double total;
+
+    @ManyToOne
+    @JoinColumn(name = "userEmail")
     private User user;
-
-    @Column(name = "userEmail", nullable = false)
-    private String userEmail;
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "orders")
-    private Set<Product> products;
 }

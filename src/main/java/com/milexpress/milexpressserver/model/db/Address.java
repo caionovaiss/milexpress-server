@@ -35,6 +35,7 @@ public class Address {
     @Column(name = "number", nullable = false)
     private String number;
 
-    @Column(name = "complemetn")
+    @Column(name = "complement")
     private String complement;
+
 }

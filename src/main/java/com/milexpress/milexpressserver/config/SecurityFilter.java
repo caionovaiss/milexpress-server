@@ -1,6 +1,7 @@
 package com.milexpress.milexpressserver.config;
 
 import com.milexpress.milexpressserver.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +27,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = this.recoverToken(request);
         if (token != null) {
             var email = tokenService.validateToken(token);
-            UserDetails user = this.userRepository.findByEmail(email);
+            UserDetails user = this.userRepository.findById(email)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);

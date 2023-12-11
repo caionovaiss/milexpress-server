@@ -1,55 +1,63 @@
 package com.milexpress.milexpressserver.service;
 
 import com.milexpress.milexpressserver.model.request.ProductRequest;
-import com.milexpress.milexpressserver.model.request.CartRequest;
 import com.milexpress.milexpressserver.model.db.Product;
+import com.milexpress.milexpressserver.model.request.ProductRequestBulk;
+import com.milexpress.milexpressserver.model.response.ProductResponse;
 import com.milexpress.milexpressserver.repository.ProductRepository;
-import com.milexpress.milexpressserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private UserRepository userRepository;
 
-    ProductService(@Autowired ProductRepository productRepository, @Autowired UserRepository userRepository) {
+    ProductService(@Autowired ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
     public Product save(ProductRequest productRequest) {
-        return convertProductRequestToProduct(productRequest);
+        return productRepository.save(convertProductRequestToProduct(productRequest));
+    }
+
+    public List<Product> getAll() {
+        return productRepository.findAll();
+    }
+
+    public void saveAll(ProductRequestBulk productRequestBulk) {
+        for (ProductRequest productRequest : productRequestBulk.products()) {
+            productRepository.save(convertProductRequestToProduct(productRequest));
+        }
     }
 
     private Product convertProductRequestToProduct(ProductRequest productRequest) {
         Product product = new Product();
         product.setTitle(productRequest.title());
         product.setDescription(productRequest.description());
+        product.setValue(productRequest.value());
         product.setImage(productRequest.image());
+        product.setNote(productRequest.note());
         return product;
     }
 
-    public Product addProductToCart(CartRequest cartRequest) {
-        Integer productId = cartRequest.productId();
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found for ID: " + productId));
-
-        product.addUser(userRepository.findByEmail(cartRequest.userEmail()));
-        return productRepository.save(product);
-
+    public ProductResponse getProductById(Integer productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("Produto nao encontrado " + productId));
+        return convertToProductResponse(product);
     }
 
-    public Product removeFromCart(CartRequest removeProductFromCartRequest) {
-        Integer productId = removeProductFromCartRequest.productId();
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found for ID: " + productId));
-
-        product.removeUserFromCart(userRepository.findByEmail(removeProductFromCartRequest.userEmail()));
-        return productRepository.save(product);
-    }
-
-    public List<Product> getAll() {
-        return productRepository.findAll();
+    private ProductResponse convertToProductResponse(Product product) {
+        return new ProductResponse(
+                product.getProductId(),
+                product.getTitle(),
+                product.getDescription(),
+                product.getImage(),
+                product.getNote(),
+                product.getValue());
     }
 }

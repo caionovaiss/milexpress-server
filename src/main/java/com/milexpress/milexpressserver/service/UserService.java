@@ -6,6 +6,7 @@ import com.milexpress.milexpressserver.model.request.UserRequest;
 import com.milexpress.milexpressserver.model.response.UserResponse;
 import com.milexpress.milexpressserver.model.db.User;
 import com.milexpress.milexpressserver.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +29,8 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username);
+        return userRepository.findById(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     UserService(@Autowired UserRepository userRepository) {
@@ -50,6 +52,7 @@ public class UserService implements UserDetailsService {
         User user = new User();
         user.setName(userRegRequest.name());
         user.setEmail(userRegRequest.email());
+        user.setCpf(userRegRequest.cpf());
         user.setPassword(new BCryptPasswordEncoder().encode(userRegRequest.password()));
         user.setRole(userRegRequest.role());
 
@@ -57,7 +60,8 @@ public class UserService implements UserDetailsService {
     }
 
     public UserResponse getUser(String userEmail) {
-        User user = userRepository.findByEmail(userEmail);
+        User user = userRepository.findById(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         System.out.println("Meu usuario lindo: " + user);
         return userToUserResponse(user);
     }
@@ -70,7 +74,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUserData(UpdateUserRequest updateUserRequest) {
-        User user = userRepository.findByEmail(updateUserRequest.email());
+        User user = userRepository.findById(updateUserRequest.email())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setName(updateUserRequest.name());
 
         return userRepository.save(user);

@@ -1,6 +1,5 @@
 package com.milexpress.milexpressserver.model.db;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -20,21 +18,17 @@ import java.util.Set;
 @EqualsAndHashCode(of = "email")
 public class User implements UserDetails {
     @Id
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "password", nullable = false)
     private String password;
-
-    @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "role", nullable = false)
+    private String cpf;
     private UserRole role;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "userCart")
-    private Set<Product> cartProducts;
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
