@@ -68,7 +68,7 @@ public class CartService {
         }
     }
 
-    public void removeProductFromCart(CartRequest cartRequest) {
+    public void subtractProductFromCart(CartRequest cartRequest) {
         User user = userRepository.findById(cartRequest.userEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
@@ -139,5 +139,30 @@ public class CartService {
         List<CartItems> cartItemsList = cartItemsRepository.deleteAllByCart(cart);
 
         cartRepository.deleteByUser(user);
+    }
+
+    @Transactional
+    public void removeProductFromCart(CartRequest cartRequest) {
+        User user = userRepository.findById(cartRequest.userEmail())
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+        Cart cart = cartRepository.findByUser(user)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
+
+        Product product = productRepository.findById(cartRequest.productId())
+                .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
+
+        Optional<CartItems> existingCartItem = cartItemsRepository.findByCartAndProduct(cart, product);
+
+        if (existingCartItem.isEmpty()) {
+            throw new EntityNotFoundException("Esse item nao esta no carrinho do usuario");
+        } else {
+            CartItems cartItem = existingCartItem.get();
+            cartItemsRepository.delete(cartItem);
+        }
     }
 }

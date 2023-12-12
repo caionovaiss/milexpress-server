@@ -23,7 +23,12 @@ public class CartController {
         cartService.addProductToCart(cartRequest);
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping("/subtract")
+    public void subtractProductFromCart(@RequestBody CartRequest cartRequest) {
+        cartService.subtractProductFromCart(cartRequest);
+    }
+
+    @DeleteMapping("/delete")
     public void removeProductFromCart(@RequestBody CartRequest cartRequest) {
         cartService.removeProductFromCart(cartRequest);
     }

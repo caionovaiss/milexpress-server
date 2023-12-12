@@ -2,6 +2,7 @@ package com.milexpress.milexpressserver.controllers;
 
 import com.milexpress.milexpressserver.model.db.OrderItems;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
+import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
 import com.milexpress.milexpressserver.model.response.OrderResponse;
 import com.milexpress.milexpressserver.service.OrderService;
@@ -32,8 +33,13 @@ public class OrderController {
         return orderService.getOrder(orderId);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public OrderResponse updateOrderStatus(@RequestBody UpdateOrderRequest updateOrderRequest) {
         return orderService.updateOrderStatus(updateOrderRequest);
+    }
+
+    @PostMapping("/rate")
+    public OrderResponse rateOrder(@RequestBody RateOrderRequest rateOrderRequest){
+        return orderService.rateOrder(rateOrderRequest);
     }
 }

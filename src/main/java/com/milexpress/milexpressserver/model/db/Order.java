@@ -31,6 +31,10 @@ public class Order {
     @Column(name = "total", nullable = false)
     private double total;
 
+    @OneToOne
+    @JoinColumn(name = "rateId")
+    private OrderRate orderRate;
+
     @ManyToOne
     @JoinColumn(name = "userEmail")
     private User user;

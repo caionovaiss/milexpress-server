@@ -2,6 +2,7 @@ package com.milexpress.milexpressserver.service;
 
 import com.milexpress.milexpressserver.model.db.*;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
+import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
 import com.milexpress.milexpressserver.model.response.CartResponse;
 import com.milexpress.milexpressserver.model.response.OrderResponse;
@@ -21,6 +22,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartItemsRepository cartItemsRepository;
     private final OrderItemsRepository orderItemsRepository;
+    private final OrderRateRepository orderRateRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
 
@@ -30,7 +32,9 @@ public class OrderService {
                  @Autowired UserRepository userRepository,
                  @Autowired CartService cartService,
                  @Autowired ProductRepository productRepository,
-                 @Autowired OrderItemsRepository orderItemsRepository) {
+                 @Autowired OrderItemsRepository orderItemsRepository,
+                 @Autowired OrderRateRepository orderRateRepository
+    ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.cartItemsRepository = cartItemsRepository;
@@ -38,6 +42,7 @@ public class OrderService {
         this.cartService = cartService;
         this.productRepository = productRepository;
         this.orderItemsRepository = orderItemsRepository;
+        this.orderRateRepository = orderRateRepository;
     }
 
     public List<OrderResponse> getAll(String userEmail) {
@@ -115,6 +120,22 @@ public class OrderService {
 
         order.setStatus(updateOrderRequest.status());
         orderRepository.save(order);
+        return convertToOrderResponse(order);
+    }
+
+    public OrderResponse rateOrder(RateOrderRequest rateOrderRequest) {
+        Order order = orderRepository.findById(rateOrderRequest.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Trying to rate an null order"));
+
+        OrderRate orderRate = new OrderRate();
+        orderRate.setStarRating(rateOrderRequest.starRating());
+        orderRate.setNote(rateOrderRequest.note());
+        orderRate = orderRateRepository.save(orderRate);
+
+        order.setOrderRate(orderRate);
+
+        order = orderRepository.save(order);
+
         return convertToOrderResponse(order);
     }
 }
