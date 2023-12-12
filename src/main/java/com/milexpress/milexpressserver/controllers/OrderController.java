@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://192.168.15.18:8080")
 @RequestMapping("/orders")
 public class OrderController {
     @Autowired
     private OrderService orderService;
 
     @GetMapping
-    public List<OrderResponse> getAll(@RequestParam String userEmail) {
+    public List<OrderResponse> getAll(@RequestBody String userEmail) {
         return orderService.getAll(userEmail);
     }
 
