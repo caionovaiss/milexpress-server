@@ -2,6 +2,7 @@ package com.milexpress.milexpressserver.service;
 
 import com.milexpress.milexpressserver.model.db.*;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
+import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
 import com.milexpress.milexpressserver.model.response.CartResponse;
 import com.milexpress.milexpressserver.model.response.OrderResponse;
 import com.milexpress.milexpressserver.model.response.ProductResponse;
@@ -55,7 +56,14 @@ public class OrderService {
     }
 
     private OrderResponse convertToOrderResponse(Order order) {
-        return new OrderResponse(order.getOrderId(), order.getStatus(), order.getSubtotal(), order.getTax());
+        return new OrderResponse(
+                order.getOrderId(),
+                order.getStatus(),
+                order.getSubtotal(),
+                order.getTax(),
+                order.getTotal(),
+                order.getDiscount()
+        );
     }
 
     public List<OrderItems> createOrder(OrderRequest orderRequest) {
@@ -92,5 +100,21 @@ public class OrderService {
 
         return items;
 
+    }
+
+    public OrderResponse getOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        return convertToOrderResponse(order);
+    }
+
+    public OrderResponse updateOrderStatus(UpdateOrderRequest updateOrderRequest) {
+        Order order = orderRepository.findById(updateOrderRequest.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        order.setStatus(updateOrderRequest.status());
+        orderRepository.save(order);
+        return convertToOrderResponse(order);
     }
 }

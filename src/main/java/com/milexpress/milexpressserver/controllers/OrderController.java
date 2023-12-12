@@ -2,8 +2,8 @@ package com.milexpress.milexpressserver.controllers;
 
 import com.milexpress.milexpressserver.model.db.OrderItems;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
+import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
 import com.milexpress.milexpressserver.model.response.OrderResponse;
-import com.milexpress.milexpressserver.model.db.Order;
 import com.milexpress.milexpressserver.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.15.18:8080")
+@CrossOrigin
 @RequestMapping("/orders")
 public class OrderController {
     @Autowired
@@ -25,5 +25,15 @@ public class OrderController {
     @PostMapping("/create")
     public List<OrderItems> createOrder(@RequestBody OrderRequest orderRequest) {
         return orderService.createOrder(orderRequest);
+    }
+
+    @GetMapping("/{orderId}")
+    public OrderResponse getOrder(@PathVariable Integer orderId) {
+        return orderService.getOrder(orderId);
+    }
+
+    @PostMapping("/update")
+    public OrderResponse updateOrderStatus(@RequestBody UpdateOrderRequest updateOrderRequest) {
+        return orderService.updateOrderStatus(updateOrderRequest);
     }
 }
