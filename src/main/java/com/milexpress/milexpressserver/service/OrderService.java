@@ -4,9 +4,7 @@ import com.milexpress.milexpressserver.model.db.*;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
 import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
-import com.milexpress.milexpressserver.model.response.CartResponse;
-import com.milexpress.milexpressserver.model.response.OrderResponse;
-import com.milexpress.milexpressserver.model.response.ProductResponse;
+import com.milexpress.milexpressserver.model.response.*;
 import com.milexpress.milexpressserver.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,7 @@ public class OrderService {
         this.orderRateRepository = orderRateRepository;
     }
 
-    public List<OrderResponse> getAll(String userEmail) {
+    public GetAllOrdersResponse getAll(String userEmail) {
         List<Order> orders = orderRepository.findByUserEmail(userEmail);
         List<OrderResponse> orderResponses = new ArrayList<>();
 
@@ -57,7 +55,13 @@ public class OrderService {
             orderResponses.add(convertToOrderResponse(order));
         });
 
-        return orderResponses;
+        List<List<OrderItems>> orderItemsList = new ArrayList<>();
+
+        for(OrderResponse order : orderResponses){
+            OrderItemsResponse orderItemsResponse = getOrder(order.orderId());
+            orderItemsList.add(orderItemsResponse.orderItemsList());
+        }
+        return new GetAllOrdersResponse(orderResponses, orderItemsList);
     }
 
     private OrderResponse convertToOrderResponse(Order order) {
@@ -71,7 +75,7 @@ public class OrderService {
         );
     }
 
-    public List<OrderItems> createOrder(OrderRequest orderRequest) {
+    public OrderResponse createOrder(OrderRequest orderRequest) {
         User user = userRepository.findById(orderRequest.userEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -103,15 +107,25 @@ public class OrderService {
         }
         cartService.cleanCart(orderRequest.userEmail());
 
-        return items;
+        return convertToOrderResponse(order);
 
     }
 
-    public OrderResponse getOrder(Integer orderId) {
+    public OrderItemsResponse getOrder(Integer orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        return convertToOrderResponse(order);
+        List<OrderItems> items = orderItemsRepository.findAllByOrder(order);
+
+        return new OrderItemsResponse(items,
+                new OrderResponse( order.getOrderId(),
+                        order.getStatus(),
+                        order.getSubtotal(),
+                        order.getTax(),
+                        order.getTotal(),
+                        order.getDiscount()
+                )
+        );
     }
 
     public OrderResponse updateOrderStatus(UpdateOrderRequest updateOrderRequest) {

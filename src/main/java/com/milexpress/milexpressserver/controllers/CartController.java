@@ -13,7 +13,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @GetMapping
+    @PostMapping
     public CartResponse getUserCart(@RequestBody String userEmail) {
         return cartService.getUserCart(userEmail);
     }
