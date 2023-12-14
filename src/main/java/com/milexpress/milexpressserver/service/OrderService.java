@@ -46,7 +46,7 @@ public class OrderService {
         this.orderRateRepository = orderRateRepository;
     }
 
-    public GetAllOrdersResponse getAll(String userEmail) {
+    public List<OrderResponse> getAll(String userEmail) {
         List<Order> orders = orderRepository.findByUserEmail(userEmail);
         List<OrderResponse> orderResponses = new ArrayList<>();
 
@@ -58,14 +58,9 @@ public class OrderService {
             orderResponses.add(convertToOrderResponse(order));
         });
 
-        List<List<OrderItems>> orderItemsList = new ArrayList<>();
 
-        for(OrderResponse order : orderResponses){
-            OrderItemsResponse orderItemsResponse = getOrder(order.orderId());
-            orderItemsList.add(orderItemsResponse.orderItemsList());
-        }
-        return new GetAllOrdersResponse(orderResponses, orderItemsList);
-    }
+        return orderResponses;
+     }
 
     private OrderResponse convertToOrderResponse(Order order) {
         return new OrderResponse(
