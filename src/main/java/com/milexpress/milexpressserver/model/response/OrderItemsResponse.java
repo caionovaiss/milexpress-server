@@ -6,7 +6,5 @@ import java.util.List;
 
 public record OrderItemsResponse(
         List<OrderItems> orderItemsList,
-        OrderResponse orderResponse
-
-) {
+        OrderResponse orderResponse) {
 }

@@ -15,12 +15,13 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/orders")
-public class OrderController {
+public class    OrderController {
     @Autowired
     private OrderService orderService;
 
     @PostMapping
     public List<OrderResponse> getAll(@RequestBody String userEmail) {
+
         return orderService.getAll(userEmail);
     }
 
