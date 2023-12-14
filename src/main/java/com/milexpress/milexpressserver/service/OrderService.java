@@ -4,15 +4,16 @@ import com.milexpress.milexpressserver.model.db.*;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
 import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
-import com.milexpress.milexpressserver.model.response.CartResponse;
-import com.milexpress.milexpressserver.model.response.OrderResponse;
-import com.milexpress.milexpressserver.model.response.ProductResponse;
+import com.milexpress.milexpressserver.model.response.*;
 import com.milexpress.milexpressserver.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -67,11 +68,12 @@ public class OrderService {
                 order.getSubtotal(),
                 order.getTax(),
                 order.getTotal(),
-                order.getDiscount()
+                order.getDiscount(),
+                order.getCreatedAt()
         );
     }
 
-    public List<OrderItems> createOrder(OrderRequest orderRequest) {
+    public OrderResponse createOrder(OrderRequest orderRequest) {
         User user = userRepository.findById(orderRequest.userEmail())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
@@ -82,6 +84,7 @@ public class OrderService {
         order.setDiscount(orderRequest.discount());
         order.setStatus(orderRequest.status());
         order.setUser(user);
+        order.setCreatedAt(new Date().toInstant());
 
         order = orderRepository.save(order);
 
@@ -103,15 +106,16 @@ public class OrderService {
         }
         cartService.cleanCart(orderRequest.userEmail());
 
-        return items;
-
+        return convertToOrderResponse(order);
     }
 
-    public OrderResponse getOrder(Integer orderId) {
+    public OrderItemsResponse getOrder(Integer orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        return convertToOrderResponse(order);
+        List<OrderItems> items = orderItemsRepository.findAllByOrder(order);
+
+        return new OrderItemsResponse(items, convertToOrderResponse(order));
     }
 
     public OrderResponse updateOrderStatus(UpdateOrderRequest updateOrderRequest) {
@@ -137,5 +141,22 @@ public class OrderService {
         order = orderRepository.save(order);
 
         return convertToOrderResponse(order);
+    }
+
+    public GetAllOrdersResponse getAllOrdersWithProducts(String userEmail) {
+        List<OrderResponse> orderResponses = getAll(userEmail);
+        List<Order> orders = orderRepository.findByUserEmail(userEmail);
+
+        List<List<OrderItems>> orderItemsList = new ArrayList<>();
+
+        for (Order order : orders) {
+            List<OrderItems> orderItems = orderItemsRepository.findAllByOrder(order);
+            orderItemsList.add(orderItems);
+        }
+
+        GetAllOrdersResponse getAllOrdersResponse = new GetAllOrdersResponse(orderResponses, orderItemsList);
+
+        System.out.println(getAllOrdersResponse);
+        return getAllOrdersResponse;
     }
 }

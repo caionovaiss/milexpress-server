@@ -45,7 +45,7 @@ public class UserController {
         return userService.updateUserData(updateUserRequest);
     }
 
-    @GetMapping("/getUser")
+    @PostMapping("/getUser")
     public UserResponse getUser(@RequestBody String userEmail) {
         System.out.println("user email: " + userEmail);
         return userService.getUser(userEmail);

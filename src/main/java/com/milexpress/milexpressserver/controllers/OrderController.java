@@ -1,9 +1,10 @@
 package com.milexpress.milexpressserver.controllers;
 
-import com.milexpress.milexpressserver.model.db.OrderItems;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
 import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
+import com.milexpress.milexpressserver.model.response.GetAllOrdersResponse;
+import com.milexpress.milexpressserver.model.response.OrderItemsResponse;
 import com.milexpress.milexpressserver.model.response.OrderResponse;
 import com.milexpress.milexpressserver.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +19,23 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping
+    @PostMapping
     public List<OrderResponse> getAll(@RequestBody String userEmail) {
         return orderService.getAll(userEmail);
     }
 
+    @PostMapping("/all")
+    public GetAllOrdersResponse getAllOrdersWithProducts(@RequestBody String userEmail){
+        return orderService.getAllOrdersWithProducts(userEmail);
+    }
+
     @PostMapping("/create")
-    public List<OrderItems> createOrder(@RequestBody OrderRequest orderRequest) {
+    public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
         return orderService.createOrder(orderRequest);
     }
 
     @GetMapping("/{orderId}")
-    public OrderResponse getOrder(@PathVariable Integer orderId) {
+    public OrderItemsResponse getOrder(@PathVariable Integer orderId) {
         return orderService.getOrder(orderId);
     }
 
@@ -39,7 +45,7 @@ public class OrderController {
     }
 
     @PostMapping("/rate")
-    public OrderResponse rateOrder(@RequestBody RateOrderRequest rateOrderRequest){
+    public OrderResponse rateOrder(@RequestBody RateOrderRequest rateOrderRequest) {
         return orderService.rateOrder(rateOrderRequest);
     }
 }
