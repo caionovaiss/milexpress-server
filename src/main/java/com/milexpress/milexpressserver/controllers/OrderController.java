@@ -1,6 +1,5 @@
 package com.milexpress.milexpressserver.controllers;
 
-import com.milexpress.milexpressserver.model.db.OrderItems;
 import com.milexpress.milexpressserver.model.request.OrderRequest;
 import com.milexpress.milexpressserver.model.request.RateOrderRequest;
 import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
@@ -21,8 +20,14 @@ public class    OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public GetAllOrdersResponse getAll(@RequestBody String userEmail) {
+    public List<OrderResponse> getAll(@RequestBody String userEmail) {
+
         return orderService.getAll(userEmail);
+    }
+
+    @PostMapping("/all")
+    public GetAllOrdersResponse getAllOrdersWithProducts(@RequestBody String userEmail){
+        return orderService.getAllOrdersWithProducts(userEmail);
     }
 
     @PostMapping("/create")
@@ -41,7 +46,7 @@ public class    OrderController {
     }
 
     @PostMapping("/rate")
-    public OrderResponse rateOrder(@RequestBody RateOrderRequest rateOrderRequest){
+    public OrderResponse rateOrder(@RequestBody RateOrderRequest rateOrderRequest) {
         return orderService.rateOrder(rateOrderRequest);
     }
 }

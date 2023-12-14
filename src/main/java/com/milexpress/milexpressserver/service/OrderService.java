@@ -7,10 +7,13 @@ import com.milexpress.milexpressserver.model.request.UpdateOrderRequest;
 import com.milexpress.milexpressserver.model.response.*;
 import com.milexpress.milexpressserver.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -71,7 +74,8 @@ public class OrderService {
                 order.getSubtotal(),
                 order.getTax(),
                 order.getTotal(),
-                order.getDiscount()
+                order.getDiscount(),
+                order.getCreatedAt()
         );
     }
 
@@ -86,6 +90,7 @@ public class OrderService {
         order.setDiscount(orderRequest.discount());
         order.setStatus(orderRequest.status());
         order.setUser(user);
+        order.setCreatedAt(new Date().toInstant());
 
         order = orderRepository.save(order);
 
@@ -117,15 +122,9 @@ public class OrderService {
 
         List<OrderItems> items = orderItemsRepository.findAllByOrder(order);
 
-        return new OrderItemsResponse(items,
-                new OrderResponse( order.getOrderId(),
-                        order.getStatus(),
-                        order.getSubtotal(),
-                        order.getTax(),
-                        order.getTotal(),
-                        order.getDiscount()
-                )
-        );
+
+        return new OrderItemsResponse(items, convertToOrderResponse(order));
+
     }
 
     public OrderResponse updateOrderStatus(UpdateOrderRequest updateOrderRequest) {
@@ -151,5 +150,22 @@ public class OrderService {
         order = orderRepository.save(order);
 
         return convertToOrderResponse(order);
+    }
+
+    public GetAllOrdersResponse getAllOrdersWithProducts(String userEmail) {
+        List<OrderResponse> orderResponses = getAll(userEmail);
+        List<Order> orders = orderRepository.findByUserEmail(userEmail);
+
+        List<List<OrderItems>> orderItemsList = new ArrayList<>();
+
+        for (Order order : orders) {
+            List<OrderItems> orderItems = orderItemsRepository.findAllByOrder(order);
+            orderItemsList.add(orderItems);
+        }
+
+        GetAllOrdersResponse getAllOrdersResponse = new GetAllOrdersResponse(orderResponses, orderItemsList);
+
+        System.out.println(getAllOrdersResponse);
+        return getAllOrdersResponse;
     }
 }

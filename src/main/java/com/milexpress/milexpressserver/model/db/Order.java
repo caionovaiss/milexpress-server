@@ -1,8 +1,10 @@
 package com.milexpress.milexpressserver.model.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -10,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Table(name = "orders")
 @Entity(name = "orders")
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +41,7 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "userEmail")
     private User user;
+
+    @Column(name = "createdAt", nullable = false)
+    private Instant createdAt;
 }
