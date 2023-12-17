@@ -62,7 +62,6 @@ public class UserService implements UserDetailsService {
     public UserResponse getUser(String userEmail) {
         User user = userRepository.findById(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        System.out.println("Meu usuario lindo: " + user);
         return userToUserResponse(user);
     }
 

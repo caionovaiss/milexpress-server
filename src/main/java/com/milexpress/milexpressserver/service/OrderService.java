@@ -117,7 +117,6 @@ public class OrderService {
 
         List<OrderItems> items = orderItemsRepository.findAllByOrder(order);
 
-
         return new OrderItemsResponse(items, convertToOrderResponse(order));
 
     }
