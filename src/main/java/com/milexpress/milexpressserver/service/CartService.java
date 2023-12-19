@@ -101,10 +101,12 @@ public class CartService {
     public CartResponse getUserCart(String userEmail) {
         User user = userRepository.findById(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new EntityNotFoundException("User has no cart"));
+        Optional<Cart> cart = cartRepository.findByUser(user);
 
-        List<CartItems> cartItems = cartItemsRepository.findAllByCart(cart);
+        if (cart.isEmpty()) {
+            return new CartResponse(new ArrayList<>(), new ArrayList<>());
+        }
+        List<CartItems> cartItems = cartItemsRepository.findAllByCart(cart.get());
 
         List<ProductResponse> productResponses = new ArrayList<>();
         List<Integer> quantities = new ArrayList<>();
