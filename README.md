@@ -51,4 +51,5 @@ Este projeto foi desenvolvido como parte da disciplina de Gestão de Projetos no
    spring.datasource.username=seu-usuario
    spring.datasource.password=sua-senha
 4. Compile e execute o projeto utilizando Maven:
+   ```bash
    mvn spring-boot:run
